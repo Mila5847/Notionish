@@ -1,6 +1,5 @@
 import express from "express";
-import cookieParser from "cookie-parser";
-import cors from "cors";
+import path from "node:path";
 import { env } from "./env.js";
 import { errorHandler } from "./lib/errors.js";
 import authRouter from "./auth/router.js";
@@ -13,16 +12,23 @@ import utilRouter from "./util/bookmark.js";
 
 const app = express();
 
-app.use(
-  cors({
-    origin: env.PUBLIC_ORIGIN,
-    credentials: true,
-  }),
-);
 app.use(express.json({ limit: "5mb" }));
-app.use(cookieParser());
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
+
+if (env.WEB_DIST) {
+  const webDist = path.resolve(env.WEB_DIST);
+  app.use(
+    express.static(webDist, {
+      setHeaders: (res, file) => {
+        res.setHeader(
+          "Cache-Control",
+          file.includes(`${path.sep}assets${path.sep}`) ? "public, max-age=31536000, immutable" : "no-store",
+        );
+      },
+    }),
+  );
+}
 
 app.use("/auth", authRouter);
 app.use("/workspaces", workspacesRouter);

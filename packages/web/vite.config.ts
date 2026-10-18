@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import path from "node:path";
 
 export default defineConfig({
+  // Relative asset URLs so the app also works under Home Assistant's ingress sub-path.
+  base: "./",
   plugins: [react()],
   resolve: {
     alias: {

@@ -46,7 +46,8 @@ router.post(
       filename: asset.filename,
       mimeType: asset.mimeType,
       sizeBytes: asset.sizeBytes,
-      url: `/files/${asset.id}`,
+      // Relative so it resolves under the Home Assistant ingress sub-path too.
+      url: `files/${asset.id}`,
     });
   }),
 );

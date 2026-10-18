@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ChevronsUpDown, LogOut, Plus, Settings, User } from "lucide-react";
+import { Check, ChevronsUpDown, Plus, Settings, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useWorkspaces, useCreateWorkspace } from "./hooks";
-import { useLogout, useMe } from "@/features/auth/hooks";
+import { useMe } from "@/features/auth/hooks";
 import { cn } from "@/lib/cn";
 
 interface Props {
@@ -26,7 +26,6 @@ interface Props {
 export function WorkspaceSwitcher({ currentId, onSelect, onOpenSettings, onOpenAccount }: Props) {
   const { data: workspaces = [] } = useWorkspaces();
   const { data: me } = useMe();
-  const logout = useLogout();
   const create = useCreateWorkspace();
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
@@ -46,7 +45,7 @@ export function WorkspaceSwitcher({ currentId, onSelect, onOpenSettings, onOpenA
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-64">
-          <DropdownMenuLabel>{me?.email}</DropdownMenuLabel>
+          <DropdownMenuLabel>{me?.name}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
           {workspaces.map((w) => (
@@ -75,10 +74,6 @@ export function WorkspaceSwitcher({ currentId, onSelect, onOpenSettings, onOpenA
               <span>Account</span>
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem onClick={() => logout.mutate()}>
-            <LogOut className="h-4 w-4" />
-            <span>Log out</span>
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
