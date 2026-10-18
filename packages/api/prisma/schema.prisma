@@ -1,0 +1,131 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextIndex", "fullTextSearch"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+
+  memberships   Membership[]
+  createdPages  Page[]      @relation("PageCreatedBy")
+  uploads       Asset[]
+  favorites     Favorite[]
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  iconUrl   String?
+  createdAt DateTime @default(now())
+
+  members Membership[]
+  pages   Page[]
+  assets  Asset[]
+}
+
+enum Role {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+enum PageType {
+  PAGE
+  FOLDER
+}
+
+model Membership {
+  id          String   @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        Role
+  createdAt   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+}
+
+model Page {
+  id           String    @id @default(cuid())
+  workspaceId  String
+  parentPageId String?
+  type         PageType  @default(PAGE)
+  title        String    @default("")
+  icon         String?
+  coverUrl     String?
+  position     String
+  createdById  String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  archivedAt   DateTime?
+
+  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  parent    Page?      @relation("PageChildren", fields: [parentPageId], references: [id], onDelete: Cascade)
+  children  Page[]     @relation("PageChildren")
+  createdBy User       @relation("PageCreatedBy", fields: [createdById], references: [id])
+  blocks    Block[]
+  favorites Favorite[]
+
+  @@index([workspaceId, parentPageId])
+  @@index([workspaceId, archivedAt])
+  @@fulltext([title])
+}
+
+model Block {
+  id            String   @id @default(cuid())
+  pageId        String
+  parentBlockId String?
+  type          String
+  content       Json
+  textContent   String   @db.Text
+  position      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  page     Page    @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  parent   Block?  @relation("BlockChildren", fields: [parentBlockId], references: [id], onDelete: Cascade)
+  children Block[] @relation("BlockChildren")
+
+  @@index([pageId, parentBlockId])
+  @@fulltext([textContent])
+}
+
+model Asset {
+  id          String   @id @default(cuid())
+  workspaceId String
+  uploaderId  String
+  filename    String
+  mimeType    String
+  sizeBytes   Int
+  path        String
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  uploader  User      @relation(fields: [uploaderId], references: [id])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  pageId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, pageId])
+  @@index([userId])
+}

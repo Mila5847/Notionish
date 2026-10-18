@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 12%;
+    --primary: 0 0% 12%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 12%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 12%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 12%;
+    --radius: 0.5rem;
+
+    --sidebar: 0 0% 98%;
+    --sidebar-foreground: 0 0% 25%;
+  }
+
+  .dark {
+    --background: 0 0% 10%;
+    --foreground: 0 0% 92%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 92%;
+    --primary: 0 0% 92%;
+    --primary-foreground: 0 0% 10%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 92%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 18%;
+    --accent-foreground: 0 0% 92%;
+    --destructive: 0 63% 40%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 80%;
+
+    --sidebar: 0 0% 12%;
+    --sidebar-foreground: 0 0% 78%;
+  }
+}
+
+@layer base {
+  html {
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  * {
+    @apply border-border;
+  }
+}
+
+.bg-sidebar {
+  background-color: hsl(var(--sidebar));
+  color: hsl(var(--sidebar-foreground));
+}
+
+.editor-shell .bn-container,
+.editor-shell .bn-editor {
+  background: transparent !important;
+}
+.dark .editor-shell {
+  color-scheme: dark;
+}
+
+.editor-shell .ProseMirror-dropcursor,
+.editor-shell .prosemirror-dropcursor-block {
+  height: 4px !important;
+  background: hsl(var(--primary)) !important;
+  border-radius: 2px !important;
+  box-shadow: 0 0 0 1px hsl(var(--primary)), 0 0 6px hsl(var(--primary) / 0.5) !important;
+  pointer-events: none !important;
+}
+.editor-shell .bn-block-outer {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+.editor-shell .bn-block-group > .bn-block-outer {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+.editor-shell .bn-drag-preview {
+  opacity: 0.85 !important;
+  padding: 6px 10px !important;
+  border-radius: 6px !important;
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+  max-width: 400px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.editor-shell .bn-side-menu {
+  cursor: grab;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+.editor-shell .bn-side-menu:active {
+  cursor: grabbing;
+}
+
+
+
+.bn-block-outer:has(> .bn-block > .bn-block-content[data-content-type="toggle"][data-open="false"]) > .bn-block-group {
+  display: none;
+}
+
+

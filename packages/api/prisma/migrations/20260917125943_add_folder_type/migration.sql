@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Page` ADD COLUMN `type` ENUM('PAGE', 'FOLDER') NOT NULL DEFAULT 'PAGE';
