@@ -5,7 +5,9 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, {
+  // Resolve against the page URL rather than the origin root, so requests stay
+  // under the Home Assistant ingress sub-path when served from there.
+  const res = await fetch(path.replace(/^\//, ""), {
     credentials: "include",
     headers: {
       ...(init?.body && !(init.body instanceof FormData) ? { "Content-Type": "application/json" } : {}),

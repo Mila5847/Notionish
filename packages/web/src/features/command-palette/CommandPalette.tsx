@@ -14,7 +14,7 @@ interface Props {
   onSelectPage: (id: string) => void;
   onSelectWorkspace: (id: string) => void;
   onCreatePage: () => void;
-  onToggleTheme: () => void;
+  onToggleTheme?: () => void;
 }
 
 export function CommandPalette({
@@ -87,11 +87,13 @@ export function CommandPalette({
                   <Command.Item onSelect={() => { onCreatePage(); onOpenChange(false); }} className="flex items-center gap-2 rounded p-2 text-sm text-foreground data-[selected=true]:bg-accent">
                     <Plus className="h-4 w-4" /> New page
                   </Command.Item>
-                  <Command.Item onSelect={() => { onToggleTheme(); }} className="flex items-center gap-2 rounded p-2 text-sm text-foreground data-[selected=true]:bg-accent">
-                    <Sun className="h-4 w-4 dark:hidden" />
-                    <Moon className="h-4 w-4 hidden dark:block" />
-                    Toggle theme
-                  </Command.Item>
+                  {onToggleTheme && (
+                    <Command.Item onSelect={() => { onToggleTheme(); }} className="flex items-center gap-2 rounded p-2 text-sm text-foreground data-[selected=true]:bg-accent">
+                      <Sun className="h-4 w-4 dark:hidden" />
+                      <Moon className="h-4 w-4 hidden dark:block" />
+                      Toggle theme
+                    </Command.Item>
+                  )}
                 </Command.Group>
 
                 {workspaces.length > 1 && (

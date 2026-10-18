@@ -42,7 +42,7 @@ export function MembersDialog({ workspaceId, open, onClose }: Props) {
 
         <div className="flex gap-2">
           <Input
-            placeholder="email@example.com"
+            placeholder="Home Assistant username"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />

@@ -8,6 +8,7 @@ import { useCreatePage, usePages } from "@/features/page/hooks";
 import { TrashDialog } from "@/features/page/TrashDialog";
 import { MembersDialog } from "@/features/members/MembersDialog";
 import { motion } from "framer-motion";
+import { homeAssistantParent, useHomeAssistantTheme } from "@/lib/haTheme";
 
 export function AppShell() {
   const { data: workspaces = [] } = useWorkspaces();
@@ -22,16 +23,19 @@ export function AppShell() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [trashOpen, setTrashOpen] = useState(false);
   const [membersOpen, setMembersOpen] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">(() => {
+  const haTheme = useHomeAssistantTheme();
+  const [localTheme, setTheme] = useState<"light" | "dark">(() => {
     const stored = localStorage.getItem("theme");
     if (stored === "dark" || stored === "light") return stored;
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
 
+  const theme = haTheme ?? localTheme;
+
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+    if (!haTheme) localStorage.setItem("theme", theme);
+  }, [theme, haTheme]);
 
   useEffect(() => {
     if (!workspaces.length) return;
@@ -159,7 +163,7 @@ export function AppShell() {
         onSelectPage={setPageId}
         onSelectWorkspace={(id) => { setWorkspaceId(id); setPageId(null); }}
         onCreatePage={createPage}
-        onToggleTheme={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+        onToggleTheme={homeAssistantParent() ? undefined : () => setTheme((t) => (t === "dark" ? "light" : "dark"))}
       />
 
       {workspaceId && (

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "../db.js";
 import { asyncHandler, badRequest, conflict, forbidden, notFound } from "../lib/errors.js";
 import { requireAuth } from "../auth/middleware.js";
+import { emailForUsername } from "../auth/homeassistant.js";
 import { requireWorkspaceRole } from "./access.js";
 
 const router = Router();
@@ -91,7 +92,12 @@ router.get(
 );
 
 const inviteSchema = z.object({
-  email: z.string().email(),
+  // A Home Assistant username, or the email Notionish shows for that user.
+  email: z
+    .string()
+    .trim()
+    .min(1)
+    .transform((v) => (v.includes("@") ? v.toLowerCase() : emailForUsername(v))),
   role: z.enum(["OWNER", "EDITOR", "VIEWER"]),
 });
 
@@ -101,7 +107,7 @@ router.post(
     await requireWorkspaceRole(req.userId!, req.params.id, "OWNER");
     const { email, role } = inviteSchema.parse(req.body);
     const user = await db.user.findUnique({ where: { email } });
-    if (!user) throw notFound("No user with that email. Ask them to register first.");
+    if (!user) throw notFound("No such user. Ask them to open Notionish from Home Assistant first.");
     const existing = await db.membership.findUnique({
       where: { userId_workspaceId: { userId: user.id, workspaceId: req.params.id } },
     });

@@ -1,51 +1,18 @@
+# Local development database. The app itself runs as a Home Assistant add-on
+# (see README); for development run the api and web packages with npm.
 services:
   db:
-    image: mysql:8.0
+    image: mariadb:11
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    command: --default-authentication-plugin=caching_sha2_password
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MYSQL_DATABASE}
+      MARIADB_USER: ${MYSQL_USER}
+      MARIADB_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
     ports:
       - "${DB_PORT:-3306}:3306"
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
-  api:
-    build:
-      context: ./packages/api
-    restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: ${DATABASE_URL}
-      JWT_SECRET: ${JWT_SECRET}
-      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN}
-      UPLOAD_DIR: ${UPLOAD_DIR}
-      PORT: 4000
-      UNSPLASH_ACCESS_KEY: ${UNSPLASH_ACCESS_KEY}
-    volumes:
-      - uploads:/app/uploads
-    ports:
-      - "${API_PORT}:4000"
-
-  web:
-    build:
-      context: ./packages/web
-    restart: unless-stopped
-    depends_on:
-      - api
-    ports:
-      - "${WEB_PORT}:80"
 
 volumes:
   db_data:
-  uploads:
