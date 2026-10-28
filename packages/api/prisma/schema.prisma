@@ -1,10 +1,10 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["fullTextIndex", "fullTextSearch"]
+  provider = "prisma-client-js"
 }
 
+// One file in the add-on's /data (e.g. file:/data/notionish.db), backed up with it.
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -81,7 +81,6 @@ model Page {
 
   @@index([workspaceId, parentPageId])
   @@index([workspaceId, archivedAt])
-  @@fulltext([title])
 }
 
 model Block {
@@ -90,7 +89,7 @@ model Block {
   parentBlockId String?
   type          String
   content       Json
-  textContent   String   @db.Text
+  textContent   String
   position      String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -100,7 +99,6 @@ model Block {
   children Block[] @relation("BlockChildren")
 
   @@index([pageId, parentBlockId])
-  @@fulltext([textContent])
 }
 
 model Asset {

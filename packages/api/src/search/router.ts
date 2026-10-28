@@ -15,35 +15,35 @@ router.get(
   asyncHandler(async (req, res) => {
     await requireWorkspaceRole(req.userId!, req.params.workspaceId, "VIEWER");
     const { q } = querySchema.parse(req.query);
-    const like = `%${q}%`;
+    // SQLite's LIKE folds only ASCII, so Cyrillic is matched here, case-insensitively.
+    const needle = q.toLocaleLowerCase();
+    const matches = (text: string) => text.toLocaleLowerCase().includes(needle);
 
-    const pages = await db.page.findMany({
-      where: {
-        workspaceId: req.params.workspaceId,
-        archivedAt: null,
-        title: { contains: q },
-      },
-      select: { id: true, title: true, icon: true, parentPageId: true, updatedAt: true },
-      take: 20,
-      orderBy: { updatedAt: "desc" },
-    });
+    const pages = (
+      await db.page.findMany({
+        where: { workspaceId: req.params.workspaceId, archivedAt: null },
+        select: { id: true, title: true, icon: true, parentPageId: true, updatedAt: true },
+        orderBy: { updatedAt: "desc" },
+      })
+    )
+      .filter((p) => matches(p.title))
+      .slice(0, 20);
 
-    const blocks = await db.block.findMany({
-      where: {
-        page: { workspaceId: req.params.workspaceId, archivedAt: null },
-        textContent: { contains: q },
-      },
-      select: {
-        id: true,
-        pageId: true,
-        textContent: true,
-        page: { select: { title: true, icon: true } },
-      },
-      take: 20,
-      orderBy: { updatedAt: "desc" },
-    });
+    const blocks = (
+      await db.block.findMany({
+        where: { page: { workspaceId: req.params.workspaceId, archivedAt: null } },
+        select: {
+          id: true,
+          pageId: true,
+          textContent: true,
+          page: { select: { title: true, icon: true } },
+        },
+        orderBy: { updatedAt: "desc" },
+      })
+    )
+      .filter((b) => matches(b.textContent))
+      .slice(0, 20);
 
-    void like;
     res.json({ pages, blocks });
   }),
 );

@@ -20,18 +20,14 @@ The API trusts the `X-Remote-User-*` headers only from the Supervisor
 
 Requires Home Assistant OS or Supervised (Ingress is a Supervisor feature).
 
-1. **Database:** *Settings → Add-ons → Add-on store*, install the official
-   **MariaDB** add-on, set a password for any login in its configuration (it is
-   required to start) and start it. Notionish uses MariaDB's built-in service
-   account and creates the `notionish` database itself.
-2. **Add this repository:** *Add-on store → ⋮ → Repositories* and add
+1. **Add this repository:** *Add-on store → ⋮ → Repositories* and add
    `https://github.com/Mila5847/Notionish`. For a private repository, use
    `https://<user>:<token>@github.com/Mila5847/Notionish` with a read-only
    GitHub token. For a branch, append `#<branch>`.
-3. Find **Notionish** in the store (refresh with *⋮ → Check for updates* if
+2. Find **Notionish** in the store (refresh with *⋮ → Check for updates* if
    needed) and click **Install**. The image is built on your Home Assistant
    machine and the first build takes several minutes.
-4. Start it and enable **Show in sidebar**. Open **Notionish** from the sidebar.
+3. Start it and enable **Show in sidebar**. Open **Notionish** from the sidebar.
 
 Alternatively, install it as a **local add-on** without GitHub: copy the
 repository (without `node_modules`) to `/addons/notionish/` on the Home
@@ -60,12 +56,21 @@ only tidies the interface; it is not access control.
 
 | Option | Description |
 |---|---|
-| `database_name` | Database to use in the MariaDB add-on (default `notionish`). |
-| `database_url` | Optional. A full `mysql://user:pass@host:3306/db` URL, to use another MySQL/MariaDB server instead of the add-on. |
 | `unsplash_access_key` | Optional. Enables the Unsplash cover picker. |
+| `database_name`, `database_url` | Only for the one-time import from MariaDB, see below. |
 
-Uploads are stored in the add-on's `/data`, and the database lives in the
-MariaDB add-on. Both are included in Home Assistant backups.
+The database is SQLite (`/data/notionish.db`) and uploads are in `/data/uploads`,
+both in the add-on's own storage and so in Home Assistant backups. No database
+add-on is needed.
+
+### Moving from MariaDB (versions before 0.2)
+
+Up to 0.1 the data lived in the MariaDB add-on. On its first start, 0.2 imports
+it into SQLite by itself: from the MariaDB add-on's `database_name` database
+(default `notionish`), or from a `mysql://` URL in `database_url`. The result is
+logged and written to `/data/imported-from-mariadb.json`. If the import fails
+nothing is half-written and the next start tries again. Once Notionish shows
+your pages, the MariaDB add-on can be removed (unless something else uses it).
 
 ### Sharing workspaces
 
@@ -84,10 +89,7 @@ Requires Node 20+. Outside Home Assistant there are no user headers, so
 Home Assistant username.
 
 ```bash
-cp .env.example .env
-docker compose up -d db   # MariaDB on localhost:3306
-
-# api
+# api (SQLite in packages/api/prisma/dev.db)
 cd packages/api
 cp ../../.env.example .env
 npm install

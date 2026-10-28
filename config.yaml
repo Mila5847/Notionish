@@ -1,7 +1,7 @@
 # Home Assistant add-on manifest. The repository root is the add-on directory so
 # the Docker build can see both packages/api and packages/web.
 name: Notionish
-version: "0.1.1"
+version: "0.2.0"
 slug: notionish
 description: Block-based notes and docs, inside Home Assistant
 url: https://github.com/Mila5847/Notionish
@@ -16,8 +16,10 @@ panel_icon: mdi:notebook-outline
 panel_title: Notionish
 # Non-admin Home Assistant users can open Notionish too.
 panel_admin: false
+# The database is SQLite in /data. MariaDB is only wanted to import a pre-0.2 database
+# once; Notionish runs without it.
 services:
-  - mysql:need
+  - mysql:want
 options:
   database_name: notionish
 schema:
